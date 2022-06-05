@@ -1,3 +1,5 @@
 /logs*
 settings.yaml
 test.py
+tempCodeRunnerFile.py
+__pycache__
