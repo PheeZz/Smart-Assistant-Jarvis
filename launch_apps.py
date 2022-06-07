@@ -62,11 +62,11 @@ def launch_app(app):
 def game_protocol():
     apps = ('steam', 'update')
     for app in apps:
-        if not is_launched(app):
-            launch_app(app)
-            if app == 'update':
-                app = 'discord'
-            sleep(1)
+        # if not is_launched(app):
+        launch_app(app)
+        if app == 'update':
+            app = 'discord'
+        sleep(1)
     webbr.open_new_tab('https://music.yandex.ru/home')
     not_music_started = True
     while not_music_started:

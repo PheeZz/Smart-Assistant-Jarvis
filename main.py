@@ -15,6 +15,29 @@ def clearConsole(): return os.system(
     'cls' if os.name in ('nt', 'dos') else 'clear')
 
 
+def filter_cmd(raw_voice: str):
+    cmd = raw_voice
+    for x in config.VA_ALIAS:
+        cmd = cmd.replace(x, "").strip()
+    for x in config.VA_TBR:
+        cmd = cmd.replace(x, "").strip()
+
+    return cmd
+
+
+def recognize_cmd(cmd: str):
+    rc = {'cmd': '', 'percent': 0}
+    for c, v in config.VA_CMD_LIST.items():
+
+        for x in v:
+            vrt = fuzz.ratio(cmd, x)
+            if vrt > rc['percent']:
+                rc['cmd'] = c
+                rc['percent'] = vrt
+
+    return rc
+
+
 answers = {
     'yes': {
         'yes_one': 'jarvis_voice/Да сэр.wav',
@@ -75,29 +98,6 @@ def va_respond(voice: str):
             execute_cmd(cmd['cmd'], is_sleep_mode)
 
 
-def filter_cmd(raw_voice: str):
-    cmd = raw_voice
-    for x in config.VA_ALIAS:
-        cmd = cmd.replace(x, "").strip()
-    for x in config.VA_TBR:
-        cmd = cmd.replace(x, "").strip()
-
-    return cmd
-
-
-def recognize_cmd(cmd: str):
-    rc = {'cmd': '', 'percent': 0}
-    for c, v in config.VA_CMD_LIST.items():
-
-        for x in v:
-            vrt = fuzz.ratio(cmd, x)
-            if vrt > rc['percent']:
-                rc['cmd'] = c
-                rc['percent'] = vrt
-
-    return rc
-
-
 def change_volume(sound):  # изменение громкости звука на -30
     if int(sound.dBFS) > -30:  # .dBFS возвращает громкость в дБ
         while int(sound.dBFS) > -30:
@@ -122,25 +122,28 @@ def execute_cmd(cmd: str, is_sleep_mode: bool):  # настройка выпол
             play(change_volume(AudioSegment.from_file(
                 answers['other']['ready'])))
 
-    elif cmd == 'dota' and not is_sleep_mode:
-        play_yes_answer()
-        launch.launch_dota()
-        pf.logging.info("Dota 2 started successfully")
+    if not is_sleep_mode:
+        match cmd:
+            case 'dota':
+                play_yes_answer()
+                launch.launch_dota()
+                pf.logging.info("Dota 2 started successfully")
 
-    elif cmd == 'open_browser' and not is_sleep_mode:
-        play_yes_answer()
-        webbrowser.open_new_tab('https://www.google.com/')
-        pf.logging.info("Browser opened successfully")
+            case 'open_browser':
+                play_yes_answer()
+                webbrowser.open_new_tab('https://www.google.com/')
+                pf.logging.info("Browser opened successfully")
 
-    elif cmd == 'accept_game' and not is_sleep_mode:
-        play_yes_answer()
-        launch.accept_game()
-        pf.logging.info("Game accepter started successfully")
+            case 'accept_game':
+                play_yes_answer()
+                launch.accept_game()
+                pf.logging.info("Game accepter started successfully")
 
-    elif cmd == 'game_protocol':
-        play(change_volume(AudioSegment.from_file(answers['other']['funny'])))
-        launch.game_protocol()
-        pf.logging.info("Game protocol activated successfully")
+            case 'game_protocol':
+                play(change_volume(AudioSegment.from_file(
+                    answers['other']['funny'])))
+                launch.game_protocol()
+                pf.logging.info("Game protocol activated successfully")
 
 
 def __main__():
